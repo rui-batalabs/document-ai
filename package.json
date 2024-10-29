@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Rui Costa, Richard Ortiz, Vikrant Bakshi",
+  "author": "Rui Costa, Richard Ortiz, Vikrant Bakshi, Cem Sahin",
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.1",
