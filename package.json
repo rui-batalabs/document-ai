@@ -1,0 +1,12 @@
+{
+  "name": "document-ai",
+  "version": "0.1.0",
+  "description": "AI-Powered Document Analysis Platform with LLM Integration (Document-AI)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Rui Costa",
+  "license": "ISC"
+}
