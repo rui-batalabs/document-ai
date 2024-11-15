@@ -15,5 +15,6 @@ const getCollectionFn = (collection) => {
 };
 
 // NOTE: NEED TO CHANGE THE CODE BELOW TO HAVE THE COLLECTION(S) REQUIRED BY THE PROJECT
-export const login = getCollectionFn('login');
+export const users = getCollectionFn('users');
+export const documents = getCollectionFn('documents');
 //export const dogs = getCollectionFn('dogs');
