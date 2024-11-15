@@ -1,5 +1,8 @@
 //adapting...
+
 import express from 'express';
+import exphbs from 'express-handlebars';
+
 const app = express();
 import session from 'express-session';
 import configRoutes from './routes/index.js';

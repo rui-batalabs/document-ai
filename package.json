@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "AI-Powered Document Analysis Platform with LLM Integration (Document-AI)",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,9 +11,11 @@
   "author": "Rui Costa, Richard Ortiz, Vikrant Bakshi, Cem Sahin, Jonathan Morgan-Nishimura",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.1",
     "bcryptjs": "^2.4.3",
+    "express": "^4.21.1",
     "express-handlebars": "^8.0.1",
-    "tailwindcss": "^3.4.14"
+    "express-session": "^1.18.1",
+    "path": "^0.12.7",
+    "tailwindcss": "^3.4.15"
   }
 }
