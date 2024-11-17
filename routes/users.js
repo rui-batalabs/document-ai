@@ -12,15 +12,21 @@ router.post('/', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  /*get req.body username and password
+  	//get req.body username and password
 	const { username, password } = req.body;
-	here, you would get the user from the db based on the username, then you would read the hashed pw
-	and then compare it to the pw in the req.body
+	
+	//here, you would get the user from the db based on the username, then you would read the hashed pw
+	//and then compare it to the pw in the req.body
+	//match username to username in db; match hashed pw from db:
+	
 	let match = bcrypt.compare(password, 'HASHED_PW_FROM DB');
-	if they match then set req.session.user and then redirect them to the private page
-	 I will just do that here */
-  req.session.user = {firstName: 'Patrick', lastName: 'Hill', userId: 123};
-  res.redirect('/private');
+
+	//if they match then set req.session.user and then redirect them to the private page
+	if ( match ) {
+  		req.session.user = {firstName: 'Patrick', lastName: 'Hill', userId: 123};
+    	res.redirect('/private');
+    }
+    
 });
 
 router.get('/logout', async (req, res) => {
