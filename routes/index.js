@@ -1,14 +1,12 @@
-//adapting...
-import userRoutes from './users.js';
-import privateRoutes from './private.js';
+import { Router } from 'express';
+import usersRoute from './users.js';
+import privateRoute from './private.js';
+import registerRoute from './register.js';
 
-const constructorMethod = (app) => {
-  app.use('/', userRoutes);
-  app.use('/private', privateRoutes);
+const router = Router();
 
-  app.use('*', (req, res) => {
-    res.sendStatus(404);
-  });
-};
+router.use('/', usersRoute);
+router.use('/private', privateRoute);
+router.use('/register', registerRoute);
 
-export default constructorMethod;
+export default router;

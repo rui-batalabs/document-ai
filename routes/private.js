@@ -1,13 +1,13 @@
-//adapting...
-import {Router} from 'express';
+import { Router } from 'express';
+
 const router = Router();
 
-router.get('/', async (req, res) => {
-  res.json({route: '/private', method: req.method});
-});
-
-router.get('/dashboard', async (req, res) => {
-  res.json({route: '/private/dashboard', method: req.method});
+router.get('/', (req, res) => {
+  if (req.session.user) {
+    res.sendFile('static/privatepage.html', { root: '.' });
+  } else {
+    res.redirect('/');
+  }
 });
 
 export default router;
