@@ -18,5 +18,3 @@ const getCollectionFn = (collection) => {
 export const users = getCollectionFn('users');
 export const documents = getCollectionFn('documents');
 
-
-//export const dogs = getCollectionFn('dogs');
