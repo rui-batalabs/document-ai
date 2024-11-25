@@ -1,0 +1,35 @@
+/* Additional styles for more customization */
+body {
+  background: linear-gradient(to bottom right, #d4fc79, #96e6a1);
+}
+
+h1 {
+  font-size: 2rem;
+  color: #004085;
+}
+
+form {
+  border: 2px solid #004085;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+input:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 5px #28a745;
+}
+
+button {
+  background-color: #28a745;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
