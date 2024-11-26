@@ -1,5 +1,7 @@
+
 document.addEventListener('DOMContentLoaded', () => {
   // Handle login form submission
+  
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -9,10 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const password = document.getElementById('password').value;
 
       try {
-        const response = await fetch('/users/login', {
+        const response = await fetch('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email:email, password:password }),
         });
 
 		if (response.ok) {
@@ -24,26 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           alert('An error occurred. Please try again later.');
         }
-      } catch (error) {
-        console.error('Error during login:', error);
-        alert('An error occurred. Please try again later.');
-      }
-
+       
         if (response.redirected) {
           window.location.href = response.url; // Redirect to private or register page
         } else {
           alert('Login failed. Please check your email and password.');
         }
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error logging in:', error);
         alert('An error occurred. Please try again.');
-      }
-    });
-  }
+      }})}
+    
+  
 
   // Handle registration form submission
   const registerForm = document.getElementById('registerForm');
   if (registerForm) {
+
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -51,36 +51,38 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
 
+      
       try {
-        const response = await fetch('/users/register', {
+        const response = await fetch('/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password }),
+          body: JSON.stringify({ username:username, email:email, password:password }),
         });
 
 		if (response.ok) {
+
           // Redirect to the homepage after successful registration
           alert('Registration successful! Redirecting to the homepage.');
           window.location.href = '/';
-        } else if (response.status === 400) {
+        }
+         else if (response.status === 400) {
           alert('Registration failed. Please try again with unique credentials.');
         } else {
           alert('An error occurred. Please try again later.');
         }
-      } catch (error) {
-        console.error('Error during registration:', error);
-        alert('An error occurred. Please try again later.');
-      }
-
+     
+  
         if (response.redirected) {
           window.location.href = response.url; // Redirect to homepage or appropriate page
         } else {
           alert('Registration failed. Please try again with a unique username.');
         }
-      } catch (error) {
-        console.error('Error registering:', error);
+      } 
+     
+      catch (error) {
+        console.error('Error registering:', error.message);
         alert('An error occurred. Please try again.');
       }
     });
-  }
+  };
 });

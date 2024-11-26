@@ -1,14 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { users } from '../config/mongoCollections.js';
 
-export const addUserToDB = async (user) => {
-  if (!user || typeof user !== 'object') {
-    throw new Error('Invalid user object provided.');
-  }
 
-  const { username, email, hashed_password, profile_picture = '', uploaded_docs = [], queries = [] } = user;
+const exportedMethods = {
+  async addUser(username, email, hashed_password){
 
-  if (!username || typeof username !== 'string' || username.trim().length === 0) {
+  if (!username || typeof username !== 'string' ||username.trim().length === 0) {
     throw new Error('Invalid username.');
   }
 
@@ -34,10 +31,10 @@ export const addUserToDB = async (user) => {
   const newUser = {
     username: username.toLowerCase(),
     email: email.toLowerCase(),
-    hashed_password,
-    profile_picture: profile_picture.toLowerCase(),
-    uploaded_docs,
-    queries,
+    hashed_password: hashed_password,
+    profile_picture: '',
+    uploaded_docs: [],
+    queries: [],
   };
 
   const insertResult = await usersCollection.insertOne(newUser);
@@ -49,4 +46,24 @@ export const addUserToDB = async (user) => {
     insertedId: insertResult.insertedId.toString(),
     ...newUser,
   };
+},
+
+
+
+async getAllUsers(){
+  const usersCollection = await users();
+  let usersList = await usersCollection.find({}).toArray();
+  if(!usersList) throw 'Could not get all users';
+  usersList = usersList.map((element) => {  
+      element._id = element._id.toString();  
+      return element; 
+    });
+    return usersList; 
+},
+
+
 };
+
+
+export default exportedMethods;
+

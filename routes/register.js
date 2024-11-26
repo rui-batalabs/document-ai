@@ -9,6 +9,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+  console.log(req.body)
   const { username, email, password } = req.body;
 
   try {
@@ -16,7 +17,9 @@ router.post('/', async (req, res) => {
     const existingUser = await usersCollection.findOne({ email: email.toLowerCase() });
 
     if (existingUser) {
+      console.log(400)
       res.status(400).send('Email already exists.');
+      
       return;
     }
 
@@ -29,6 +32,7 @@ router.post('/', async (req, res) => {
       uploaded_docs: [],
       queries: [],
     };
+    console.log(newUser)
 
     const insertResult = await usersCollection.insertOne(newUser);
     if (insertResult.acknowledged) {

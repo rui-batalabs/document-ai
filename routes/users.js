@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { users } from '../config/mongoCollections.js';
-import { addUserToDB } from '../data/users.js';
+import { userData } from '../data/index.js';
 
 const router = Router();
 
@@ -28,8 +28,9 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
-
+  const username = req.body.username;
+  const password = req.body.password;
+  const email = req.body.email;
   try {
     // Hash the password
     const saltRounds = 10;
@@ -44,8 +45,16 @@ router.post('/register', async (req, res) => {
       uploaded_docs: [],
       queries: [],
     };
-
-    const result = await addUserToDB(newUser); // Add user to DB function
+    try{
+    await userData.addUser(username, email, hashedPassword); // Add user to DB function
+    }
+    catch(e){
+      if( e.message == 'Username or email already exists.'){
+        res.status(401).json({error: 'Username or email already exists.'})
+      }
+    }
+    const usersCollection = await users();
+    const result = await usersCollection.findOne({username:username})
     if (result) {
       res.redirect('/');
     } else {
