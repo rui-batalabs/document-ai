@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		if (response.ok) {
           // Redirect to the private page if successful
-          window.location.href = '/private';
+          window.location.href = '/profile';
         } else if (response.status === 401) {
           // Handle invalid credentials
           alert('Invalid email or password. Please try again.');
@@ -85,4 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   };
+
+// const profile = document.getElementById("profile");
+// if(profile){
+//   let username = 
+
+//I can do this at some point need to create session cookie with mongodb id possibly to get user info
+
+
+
+
+// }
+
 });
