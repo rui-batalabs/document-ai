@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       catch (error) {
         console.error('Error logging in:', error);
-        res.json({ message: 'This is an alert message from the server!' });
+        alert('An error occurred. Please try again.');
       }})}
     
   
