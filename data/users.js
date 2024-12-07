@@ -1,21 +1,17 @@
 import { ObjectId } from 'mongodb';
 import { users } from '../config/mongoCollections.js';
-
+import helper from '../serverSideHelpers.js'
+import e from 'express';
 
 const exportedMethods = {
-  async addUser(username, email, hashed_password){
+  async addUser(username, email, password, hashed_password){
 
-  if (!username || typeof username !== 'string' ||username.trim().length === 0) {
-    throw new Error('Invalid username.');
-  }
+  username = helper.usernameCheck(username);
+  email = helper.emailCheck(email);
+  password = helper.passwordCheck(password);
+  hashed_password = await helper.hashedPasswordCheck(password, hashed_password)
 
-  if (!email || typeof email !== 'string' || !email.includes('@')) {
-    throw new Error('Invalid email.');
-  }
-
-  if (!hashed_password || typeof hashed_password !== 'string') {
-    throw new Error('Invalid hashed password.');
-  }
+  
 
   const usersCollection = await users();
 

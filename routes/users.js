@@ -2,19 +2,28 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { users } from '../config/mongoCollections.js';
 import { userData } from '../data/index.js';
+import helper from '../serverSideHelpers.js'
 
 const router = Router();
 
 router.get('/', (req, res) => {
+  if(req.user.session){
+    return res.redirect("/private");
+  }
   res.sendFile('static/homepage.html', { root: '.' });
 });
 
 router.post('/login', async (req, res) => {
+
+  helper.emailCheck(req.body.email);
+  helper.passwordCheck(req.body.password);
+
   const { email, password } = req.body;
+
 
   try {
     const usersCollection = await users();
-    const user = await usersCollection.findOne({ email: email.toLowerCase() });
+    const user = await usersCollection.findOne({ email: email.toLowerCase()});
 
     if (user && await bcrypt.compare(password, user.hashed_password)) {
       req.session.user = { username: user.username, email: user.email, userId: user._id };
@@ -66,11 +75,5 @@ router.post('/login', async (req, res) => {
 //   }
 // });
 
-
-router.get('/signout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/')
-  
-});
 
 export default router;

@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/static', express.static('static'))
 app.use(session({
+  name:'cookieKey',
   secret: 'super_secret_key',
   resave: false,
   saveUninitialized: true,

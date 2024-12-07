@@ -1,4 +1,4 @@
-
+import helper from './helpers.js'
 document.addEventListener('DOMContentLoaded', () => {
   // Handle login form submission
   
@@ -7,10 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
+      let email = document.getElementById('email').value.trim().toLowerCase();
+      let password = document.getElementById('password').value;
+
+      
 
       try {
+        email = helper.emailCheck(email);
+        password = helper.passwordCheck(password);
         const response = await fetch('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -47,12 +51,23 @@ document.addEventListener('DOMContentLoaded', () => {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const username = document.getElementById('username').value.trim().toLowerCase();
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
+      let username = document.getElementById('username').value.trim().toLowerCase();
+      let email = document.getElementById('email').value.trim().toLowerCase();
+      let password = document.getElementById('password').value;
+      let confirmPassword = document.getElementById('confirmPassword').value;
 
       
       try {
+
+        username = helper.usernameCheck(username);
+        email = helper.emailCheck(email);
+        password = helper.passwordCheck(password);
+        confirmPassword = helper.passwordCheck(confirmPassword);
+
+        if(!password ===confirmPassword){
+          throw 'These passwords are not the same. Please try again.'
+        }
+
         const response = await fetch('/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

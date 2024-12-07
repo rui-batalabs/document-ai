@@ -1,16 +1,24 @@
 import { Router } from 'express';
-import bcrypt from 'bcryptjs';
+import bcrypt, { hash } from 'bcryptjs';
 import { users } from '../config/mongoCollections.js';
+import helper from '../serverSideHelpers.js';
 
 const router = Router();
 
 router.get('/', (req, res) => {
+  if(req.user.session){
+    return res.redirect("/private");
+  }
   res.sendFile('static/registerpage.html', { root: '.' });
 });
 
 router.post('/', async (req, res) => {
-  console.log(req.body)
-  const { username, email, password } = req.body;
+  if(req.user.session){
+    return res.redirect("/private");
+  }
+ const email = helper.emailCheck(req.body.email);
+ const password = helper.passwordCheck(req.body.password);
+ const username= helper.usernameCheck(req.body.username);
 
   try {
     const usersCollection = await users();
@@ -24,6 +32,8 @@ router.post('/', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    helper.hashedPasswordCheck(password, hashedPassword);
+
     const newUser = {
       username: username.toLowerCase(),
       email: email.toLowerCase(),
