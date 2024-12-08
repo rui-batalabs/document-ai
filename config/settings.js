@@ -1,4 +1,4 @@
 export const mongoConfig = {
-    serverUrl: 'mongodb://localhost:27017/',
-    database: 'document-ai-db'
+    serverUrl: 'mongodb://localhost:27017',
+    database: 'documentAIDB'
 };

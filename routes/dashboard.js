@@ -1,19 +1,15 @@
 import {Router} from 'express';
 import multer from 'multer';
-import path from 'path';
-import {fileURLToPath} from 'url';
-import {users} from '../config/mongoCollections.js'; // Import the users collection
+import {GridFsStorage} from 'multer-gridfs-storage';
+import {GridFSBucket, ObjectId} from 'mongodb';
+import {users} from '../config/mongoCollections.js';
+import {dbConnection} from '../config/mongoConnection.js';
+import {mongoConfig} from '../config/settings.js';
 
 const router = Router();
 
-// Workaround for __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Configure multer for file uploads
-const upload = multer({
-    dest: path.join(__dirname, '../uploads/'), limits: {fileSize: 10 * 1024 * 1024}, // 10MB limit
-});
+const mongoURI = `${mongoConfig.serverUrl}/${mongoConfig.database}`;
+console.log(`MongoDB URI: ${mongoURI}`);
 
 /**
  * GET /dashboard
@@ -25,15 +21,21 @@ router.get('/', async (req, res) => {
     }
 
     try {
+        const db = await dbConnection();
+        const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
         const usersCollection = await users();
-        const user = await usersCollection.findOne({email: req.session.user.email});
 
+        // Fetch user data
+        const user = await usersCollection.findOne({email: req.session.user.email});
         if (!user) {
             return res.status(404).send('User not found.');
         }
 
+        const files = await bucket.find({'metadata.user': req.session.user.email}).toArray();
+
         res.render('dashboard', {
-            username: user.username || 'User', documents: user.uploaded_docs || [],
+            username: user.username || 'User',
+            documents: files,
         });
     } catch (error) {
         console.error('Error fetching documents:', error);
@@ -45,32 +47,71 @@ router.get('/', async (req, res) => {
  * POST /dashboard/upload
  * Handles document uploads for the user.
  */
-router.post('/upload', upload.single('document'), async (req, res) => {
+router.post('/upload', async (req, res, next) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/signin');
     }
 
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
-    }
+    const storage = new GridFsStorage({
+        url: mongoURI,
+        file: (req, file) => {
+            if (!req.session.user.email) {
+                throw new Error('User email is missing from the session.');
+            }
 
-    try {
-        const usersCollection = await users();
-        const user = await usersCollection.findOne({email: req.session.user.email});
+            return {
+                bucketName: 'uploads',
+                filename: `${Date.now()}-${file.originalname}`,
+                metadata: {user: req.session.user.email},
+                id: new ObjectId(),
+            };
+        },
+    });
 
-        if (!user) {
-            return res.status(404).send('User not found.');
+    const upload = multer({storage}).single('document');
+
+    upload(req, res, async (err) => {
+        if (err) {
+            console.error('Error uploading file:', err);
+            return res.status(500).send('File upload failed.');
         }
 
-        const document = {
-            filename: req.file.originalname, path: req.file.path, uploadedAt: new Date(),
-        };
+        if (!req.file || !req.file.id) {
+            console.error('File upload did not return a valid file object.');
+            return res.status(500).send('File upload failed.');
+        }
 
-        await usersCollection.updateOne({email: req.session.user.email}, {$push: {uploaded_docs: document}});
+        try {
+            console.log(`File uploaded successfully: ${req.file.filename}`);
+            res.redirect('/dashboard');
+        } catch (error) {
+            console.error('Error saving file data:', error);
+            res.status(500).send('Internal Server Error');
+        }
+    });
+});
 
-        res.redirect('/dashboard');
+
+/**
+ * GET /dashboard/download/:id
+ * Handles file download by ID.
+ */
+router.get('/download/:id', async (req, res) => {
+    const fileId = new ObjectId(req.params.id);
+
+    try {
+        const db = await dbConnection();
+        const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
+
+        bucket
+            .openDownloadStream(fileId)
+            .pipe(res)
+            .on('error', (error) => {
+                console.error('Error downloading file:', error);
+                res.status(500).send('Internal Server Error');
+            });
     } catch (error) {
-        console.error('Error uploading document:', error);
+        console.error('Error downloading file:', error);
         res.status(500).send('Internal Server Error');
     }
 });

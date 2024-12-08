@@ -9,7 +9,7 @@ const router = Router();
  */
 router.get('/', (req, res) => {
     if (req.session && req.session.user) {
-        return res.redirect('/private');
+        return res.redirect('/dashboard');
     }
     res.sendFile('static/home.html', {root: '.'});
 });

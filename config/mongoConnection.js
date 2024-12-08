@@ -5,14 +5,11 @@ let _connection = undefined;
 let _db = undefined;
 
 /**
- * Establishes a connection to the MongoDB server and returns the database object.
+ * Establish a MongoDB connection and return the database object.
  */
 export const dbConnection = async () => {
     if (!_connection) {
-        _connection = await MongoClient.connect(mongoConfig.serverUrl, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        _connection = await MongoClient.connect(mongoConfig.serverUrl);
         _db = _connection.db(mongoConfig.database);
     }
 
@@ -20,7 +17,7 @@ export const dbConnection = async () => {
 };
 
 /**
- * Closes the connection to the MongoDB server.
+ * Close the MongoDB connection.
  */
 export const closeConnection = async () => {
     if (_connection) {
