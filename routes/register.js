@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
     if (req.session && req.session.user) {
         return res.redirect('/private');
     }
-    res.sendFile('static/registerpage.html', {root: '.'});
+    res.sendFile('static/register.html', {root: '.'});
 });
 
 router.post('/', async (req, res) => {
