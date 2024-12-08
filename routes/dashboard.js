@@ -1,15 +1,11 @@
 import {Router} from 'express';
 import multer from 'multer';
-import {GridFsStorage} from 'multer-gridfs-storage';
 import {GridFSBucket, ObjectId} from 'mongodb';
-import {users} from '../config/mongoCollections.js';
 import {dbConnection} from '../config/mongoConnection.js';
-import {mongoConfig} from '../config/settings.js';
+import {users} from '../config/mongoCollections.js';
 
 const router = Router();
-
-const mongoURI = `${mongoConfig.serverUrl}/${mongoConfig.database}`;
-console.log(`MongoDB URI: ${mongoURI}`);
+const upload = multer({dest: 'temp/'});
 
 /**
  * GET /dashboard
@@ -31,11 +27,11 @@ router.get('/', async (req, res) => {
             return res.status(404).send('User not found.');
         }
 
+        // Query uploaded documents
         const files = await bucket.find({'metadata.user': req.session.user.email}).toArray();
 
         res.render('dashboard', {
-            username: user.username || 'User',
-            documents: files,
+            username: user.username || 'User', documents: files,
         });
     } catch (error) {
         console.error('Error fetching documents:', error);
@@ -47,50 +43,40 @@ router.get('/', async (req, res) => {
  * POST /dashboard/upload
  * Handles document uploads for the user.
  */
-router.post('/upload', async (req, res, next) => {
+router.post('/upload', upload.single('document'), async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/signin');
     }
 
-    const storage = new GridFsStorage({
-        url: mongoURI,
-        file: (req, file) => {
-            if (!req.session.user.email) {
-                throw new Error('User email is missing from the session.');
-            }
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
 
-            return {
-                bucketName: 'uploads',
-                filename: `${Date.now()}-${file.originalname}`,
-                metadata: {user: req.session.user.email},
-                id: new ObjectId(),
-            };
-        },
-    });
+    try {
+        const db = await dbConnection();
+        const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
 
-    const upload = multer({storage}).single('document');
+        const uploadStream = bucket.openUploadStream(req.file.originalname, {
+            metadata: {user: req.session.user.email},
+        });
 
-    upload(req, res, async (err) => {
-        if (err) {
-            console.error('Error uploading file:', err);
-            return res.status(500).send('File upload failed.');
-        }
+        const fs = await import('fs');
+        const stream = fs.createReadStream(req.file.path);
 
-        if (!req.file || !req.file.id) {
-            console.error('File upload did not return a valid file object.');
-            return res.status(500).send('File upload failed.');
-        }
-
-        try {
-            console.log(`File uploaded successfully: ${req.file.filename}`);
-            res.redirect('/dashboard');
-        } catch (error) {
-            console.error('Error saving file data:', error);
-            res.status(500).send('Internal Server Error');
-        }
-    });
+        stream.pipe(uploadStream)
+            .on('error', (error) => {
+                console.error('Error uploading file:', error);
+                res.status(500).send('File upload failed.');
+            })
+            .on('finish', () => {
+                console.log(`File uploaded successfully: ${uploadStream.id}`);
+                res.redirect('/dashboard');
+            });
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
-
 
 /**
  * GET /dashboard/download/:id
