@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "Rui Costa, Richard Ortiz, Vikrant Bakshi, Cem Sahin, Jonathan Morgan-Nishimura",
