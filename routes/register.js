@@ -6,16 +6,19 @@ import helper from '../serverSideHelpers.js';
 const router = Router();
 
 router.get('/', (req, res) => {
-    if (req.user.session) {
-        return res.redirect("/private");
+    // Check if session exists and user is logged in
+    if (req.session && req.session.user) {
+        return res.redirect('/private');
     }
     res.sendFile('static/registerpage.html', {root: '.'});
 });
 
 router.post('/', async (req, res) => {
-    if (req.user.session) {
-        return res.redirect("/private");
+    // Check if session exists and user is logged in
+    if (req.session && req.session.user) {
+        return res.redirect('/private');
     }
+
     const email = helper.emailCheck(req.body.email);
     const password = helper.passwordCheck(req.body.password);
     const username = helper.usernameCheck(req.body.username);
@@ -25,9 +28,8 @@ router.post('/', async (req, res) => {
         const existingUser = await usersCollection.findOne({email: email.toLowerCase()});
 
         if (existingUser) {
-            console.log(400)
+            console.log('Email already exists');
             res.status(400).send('Email already exists.');
-
             return;
         }
 
@@ -42,7 +44,8 @@ router.post('/', async (req, res) => {
             uploaded_docs: [],
             queries: [],
         };
-        console.log(newUser)
+
+        console.log('New User:', newUser);
 
         const insertResult = await usersCollection.insertOne(newUser);
         if (insertResult.acknowledged) {
@@ -51,6 +54,7 @@ router.post('/', async (req, res) => {
             res.status(500).send('Failed to register user.');
         }
     } catch (error) {
+        console.error('Error during registration:', error);
         res.status(500).send('Internal Server Error');
     }
 });
