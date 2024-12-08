@@ -5,53 +5,62 @@ import helper from '../serverSideHelpers.js';
 
 const router = Router();
 
+/**
+ * GET /register
+ * Serves the registration page. Redirects logged-in users to /private.
+ */
 router.get('/', (req, res) => {
-    // Check if session exists and user is logged in
     if (req.session && req.session.user) {
         return res.redirect('/private');
     }
     res.sendFile('static/register.html', {root: '.'});
 });
 
+/**
+ * POST /register
+ * Handles user registration by validating inputs, checking for existing accounts,
+ * and storing new user data in the database.
+ */
 router.post('/', async (req, res) => {
-    // Check if session exists and user is logged in
-    if (req.session && req.session.user) {
-        return res.redirect('/private');
-    }
-
-    const email = helper.emailCheck(req.body.email);
-    const password = helper.passwordCheck(req.body.password);
-    const username = helper.usernameCheck(req.body.username);
-
     try {
+        if (req.session && req.session.user) {
+            return res.redirect('/private');
+        }
+
+        // Validate email and password inputs
+        const email = helper.emailCheck(req.body.email);
+        const password = helper.passwordCheck(req.body.password);
+        const confirmPassword = req.body.confirmPassword;
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            return res.status(400).send('Passwords do not match.');
+        }
+
         const usersCollection = await users();
         const existingUser = await usersCollection.findOne({email: email.toLowerCase()});
 
         if (existingUser) {
-            console.log('Email already exists');
-            res.status(400).send('Email already exists.');
-            return;
+            return res.status(400).send('Email already exists.');
         }
 
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
-        helper.hashedPasswordCheck(password, hashedPassword);
 
+        // Create new user object
         const newUser = {
-            username: username.toLowerCase(),
-            email: email.toLowerCase(),
-            hashed_password: hashedPassword,
-            profile_picture: '',
-            uploaded_docs: [],
-            queries: [],
+            email: email.toLowerCase(), hashed_password: hashedPassword, uploaded_docs: [], queries: [],
         };
 
         console.log('New User:', newUser);
 
+        // Insert the new user into the database
         const insertResult = await usersCollection.insertOne(newUser);
+
         if (insertResult.acknowledged) {
-            res.redirect('/');
+            return res.redirect('/signin');
         } else {
-            res.status(500).send('Failed to register user.');
+            return res.status(500).send('Failed to register user.');
         }
     } catch (error) {
         console.error('Error during registration:', error);

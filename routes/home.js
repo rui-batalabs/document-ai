@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
     if (req.session && req.session.user) {
         return res.redirect('/private');
     }
-    res.sendFile('static/homepage.html', {root: '.'});
+    res.sendFile('static/home.html', {root: '.'});
 });
 
 export default router;

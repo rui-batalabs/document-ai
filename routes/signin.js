@@ -12,7 +12,7 @@ const router = Router();
 router.get('/', (req, res) => {
     if (req.session && req.session.user) {
         // Redirect to the private page if already signed in
-        return res.redirect('/private');
+        return res.redirect('/dashboard');
     }
     // Serve the sign-in HTML page
     res.sendFile('static/signin.html', { root: '.' });
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
         if (user && await bcrypt.compare(password, user.hashed_password)) {
             // Set session with user details
             req.session.user = { username: user.username, email: user.email, userId: user._id };
-            return res.redirect('/private');
+            return res.redirect('/dashboard');
         }
 
         // Redirect to registration if login fails
