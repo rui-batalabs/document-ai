@@ -2,6 +2,34 @@ import helper from './helpers.js'
 document.addEventListener('DOMContentLoaded', () => {
   // Handle login form submission
   
+   // Dynamic Header Logic
+   const loginLink = document.getElementById('login-link');
+   const logoutLink = document.getElementById('logout-link');
+   const profilePicture = document.getElementById('profile-picture');
+  
+  
+  // Function to check login status
+  const isLoggedIn = () => Boolean(localStorage.getItem('user'));
+
+  if (isLoggedIn()) {
+    loginLink.style.display = 'none';
+    logoutLink.style.display = 'inline';
+    profilePicture.src = localStorage.getItem('profilePicture') || '/noProfilePicture.jpg';
+  } else {
+    logoutLink.style.display = 'none';
+  }
+
+  // Handle logout action
+  if (logoutLink) {
+    logoutLink.addEventListener('click', () => {
+      localStorage.removeItem('user'); // Clear user session
+      localStorage.removeItem('profilePicture');
+      alert('You have been logged out.');
+      window.location.href = '/';
+    });
+  }
+  
+  
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
