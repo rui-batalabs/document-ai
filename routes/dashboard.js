@@ -3,6 +3,7 @@ import multer from 'multer';
 import {GridFSBucket, ObjectId} from 'mongodb';
 import {dbConnection} from '../config/mongoConnection.js';
 import {users} from '../config/mongoCollections.js';
+import userData from '../data/users.js';
 
 const router = Router();
 const upload = multer({dest: 'temp/'});
@@ -68,8 +69,9 @@ router.post('/upload', upload.single('document'), async (req, res) => {
                 console.error('Error uploading file:', error);
                 res.status(500).send('File upload failed.');
             })
-            .on('finish', () => {
+            .on('finish', async () => {
                 console.log(`File uploaded successfully: ${uploadStream.id}`);
+                const user = await userData.addUserDocument(req.session.user.email, uploadStream.id);
                 res.redirect('/dashboard');
             });
     } catch (error) {

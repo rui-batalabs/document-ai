@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { users } from '../config/mongoCollections.js';
-import helper from '../serverSideHelpers.js'
-import e from 'express';
+import helper from '../serverSideHelpers.js';
+
 
 const exportedMethods = {
   async addUser(username, email, password, hashed_password){
@@ -56,6 +56,38 @@ async getAllUsers(){
     });
     return usersList; 
 },
+
+async addUserDocument(email, document_id){
+    email = helper.emailCheck(email);
+    if(!document_id) throw 'no document id';
+    if (!ObjectId.isValid(document_id)) {
+      throw new Error('invalid object ID');
+    };
+    const usersCollection = await users();
+    const updatedUser = await usersCollection.findOneAndUpdate(
+            {email: email},
+            {$push: {uploaded_docs: document_id}},
+            {returnDocument: 'after'}
+    )
+    if(!updatedUser) throw 'error adding document id to user documents';
+    return updatedUser;
+},
+
+async addUserQuery(email, query_id){
+  email = helper.emailCheck(email);
+  if(!query_id) throw 'no document id';
+  if (!ObjectId.isValid(query_id)) {
+    throw new Error('invalid object ID');
+  };
+  const usersCollection = await users();
+  const updatedUser = await usersCollection.findOneAndUpdate(
+          {email: email},
+          {$push: {queries: query_id}},
+          {returnDocument: 'after'}
+  )
+  if(!updatedUser) throw 'error adding document id to user documents';
+  return updatedUser;
+}
 
 
 };

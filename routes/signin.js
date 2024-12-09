@@ -34,7 +34,7 @@ router.post('/', async (req, res) => {
 
         if (user && await bcrypt.compare(password, user.hashed_password)) {
             // Set session with user details
-            req.session.user = { username: user.username, email: user.email, userId: user._id };
+            req.session.user = { email: user.email, userId: user._id };
             return res.redirect('/dashboard');
         }
 
