@@ -44,7 +44,12 @@ const exportedMethods = {
         if(user.length <5 || user.length>20) throw 'Your username must be input with 5 to 20 characters';
         if(!/^[a-zA-Z0-9_]$/.test(user)) throw 'usernames must have only letters, numbers, and or underscores';
         return user.toLowerCase();
+    },
+
+    tokenGenerator(){
+        return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
     }
+
 
 }
 

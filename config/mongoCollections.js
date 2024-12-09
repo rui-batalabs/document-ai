@@ -15,3 +15,4 @@ const getCollectionFn = (collectionName) => {
 
 export const users = getCollectionFn('users');
 export const documents = getCollectionFn('documents');
+export const passwordTokens = getCollectionFn('tokens');
