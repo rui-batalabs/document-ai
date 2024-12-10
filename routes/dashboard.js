@@ -4,6 +4,7 @@ import {GridFSBucket, ObjectId} from 'mongodb';
 import {dbConnection} from '../config/mongoConnection.js';
 import {users} from '../config/mongoCollections.js';
 import userData from '../data/users.js';
+import helper from '../serverSideHelpers.js';
 
 const router = Router();
 const upload = multer({dest: 'temp/'});
@@ -103,5 +104,25 @@ router.get('/download/:id', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+router.get('/delete/:id', async (req, res) => {
+    const fileId = new ObjectId(req.params.id);
+
+    try{
+        const db = await dbConnection();
+        const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
+
+        await bucket.delete(fileId);
+        const email = helper.emailCheck(req.session.user.email);
+        const updatedUser = userData.deleteUserFile(email, fileId);
+        res.redirect('/dashboard');
+    }
+    catch(error) {
+        console.error('Error deleting file:', error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+
 
 export default router;

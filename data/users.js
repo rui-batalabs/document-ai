@@ -87,7 +87,24 @@ async addUserQuery(email, query_id){
   )
   if(!updatedUser) throw 'error adding document id to user documents';
   return updatedUser;
+},
+
+async deleteUserFile(email, fileId){
+  email = helper.emailCheck(email);
+  if(!fileId) throw 'no document id';
+  if (!ObjectId.isValid(fileId)) {
+    throw new Error('invalid object ID');
+  };
+  const usersCollection = await users();
+  const updatedUser = await usersCollection.findOneAndUpdate(
+          {email: email},
+          {$pull: {uploaded_docs: new ObjectId(fileId)}},
+          {returnDocument: 'after'}
+  )
+  if(!updatedUser) throw 'error adding document id to user documents';
+  return updatedUser;
 }
+
 
 
 };
