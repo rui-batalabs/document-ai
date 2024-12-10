@@ -1,6 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { users } from '../config/mongoCollections.js';
 import helper from '../serverSideHelpers.js';
+import e from 'express';
+import bcrypt from 'bcryptjs';
 
 
 const exportedMethods = {
@@ -105,7 +107,22 @@ async deleteUserFile(email, fileId){
   return updatedUser;
 }
 
+async changeUserPassword(email, password, confirmPassword){
+  email = helper.emailCheck(email);
+  password = helper.passwordCheck(password);
+  confirmPassword = helper.passwordCheck(confirmPassword);
+  if(password!==confirmPassword)throw 'These passwords do not match'
+  const hashed_password = await bcrypt.hash(password,10)
+  const userCollection = await users();
+  const updatedPassword = await userCollection.findOneAndUpdate(
+    {email:email},
+    {$set: {password:hashed_password}},
+    {returnDocument:'after'}
+  )
+  if(!updatedPassword) throw 'Error updating password';
+  return updatedPassword;
 
+}
 
 };
 

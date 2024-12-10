@@ -70,7 +70,50 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('An error occurred. Please try again.');
       }})}
     
-  
+
+
+  const forgotPasswordForm = document.getElementById('forgotForm');
+    if(forgotPasswordForm){
+      forgotPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let password = document.getElementById('forgotPasswordChange').value;
+        let confirmPassword = document.getElementById('confirmPasswordChange').value;
+        try{
+          password = helper.passwordCheck(password);
+          confirmPassword = helper.passwordCheck(confirmPassword);
+
+          if(password!==confirmPassword) throw 'These passwords are not matching';
+          const response = await fetch('/passwordreset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password:password, confirmPassword:confirmPassword }),
+          });
+
+      if (response.ok) {
+
+            // Redirect to the homepage after successful registration
+            alert('Password change successful! Redirecting to the homepage.');
+            window.location.href = '/';
+          }
+          else if (response.status === 400) {
+            alert('Password change failed. Please try again.');
+          } else {
+            alert('An error occurred. Please try again later.');
+          }
+
+
+      }catch(e){
+        console.error('Error changing password:', e.message);
+          alert(e.message);
+      }
+      })
+      }
+
+
+
+
+
+
 
   // Handle registration form submission
   const registerForm = document.getElementById('registerForm');

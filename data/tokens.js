@@ -1,6 +1,7 @@
 import { ObjectId, ReturnDocument } from 'mongodb';
 import { passwordTokens } from '../config/mongoCollections.js';
 import helper from '../serverSideHelpers.js';
+import e from 'express';
 
 const exportedMethods = {
 
@@ -26,16 +27,38 @@ const exportedMethods = {
 
         if(!userToken) throw 'No token found';
 
-    }
+    },
 
 
     async createToken(email){
         //generate token, accessed = false, id, timecreated + timeexpired
         const token = helper.tokenGenerator();
+        email = helper.emailCheck(email);
 
-
-
+        const addToken = {
+            email:email,
+            token:token,
+            accessed:false,
+            time_created:new Date(Date.now()),
+            time_expired: new Date(Date.now() + 1000*60)
+        }
+        const tokenCollection = await tokens();
+        const ifToken = await tokenCollection.find({email:email});
+        if(ifToken) {
+             const newToken = await tokenCollection.findOneAndUpdate({email:email},
+                {$set: addToken},
+                {returnDocument:'after'}
+             );
     }
+        else{
+            const newToken = await tokenCollection.insertOne(addToken);
+        }
+        if(!newToken) throw 'Error adding token';
+        return newToken;
+}
+
+
+
 
 
 
