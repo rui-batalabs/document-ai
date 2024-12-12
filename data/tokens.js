@@ -64,6 +64,18 @@ const exportedMethods = {
         return newToken;
     },
 
+    async accessedToken(token){
+        token = helper.tokenCheck(token);
+        const tokenCollection = passwordTokens();
+        const updatedToken = await tokenCollection.findOneAndUpdate(
+            {token: token},
+            {$set: {accessed:true}},
+            {returnDocument:'after'}
+        );
+        if(!updatedToken) throw 'There were no valid tokens found';
+        return updatedToken;
+    }
+
 };
 
 //TEST CHANGE

@@ -47,7 +47,22 @@ const exportedMethods = {
     },
 
     tokenGenerator(){
-        return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
+        let token = '';
+        while(token.length < 16){
+            token += Math.random().toString(36).substring(2);
+        }
+        return token.substring(0,16);
+    },
+
+    tokenCheck(token){
+        if(!token) throw 'There is no token';
+        if(typeof(token)!=='string')throw 'this token is not a string';
+        token = token.trim();
+        if(token == '')throw 'This token cannot be empty'
+        if(!/^[a-z0-9]{16}$/.test(token)){
+            throw 'invalid token format';
+        }
+        return token;
     }
 
 
