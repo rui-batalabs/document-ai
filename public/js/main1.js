@@ -28,56 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '/';
     });
   }
-
- // Handle profile picture upload
- const profilePictureForm = document.getElementById('profile-picture-form');
- const profilePictureInput = document.getElementById('profile-picture-upload');
- const uploadStatus = document.getElementById('upload-status');
- const uploadError = document.getElementById('upload-error');
-
- if (profilePictureForm) {
-   profilePictureForm.addEventListener('submit', async (e) => {
-     e.preventDefault();
-
-     // Ensure a file is selected
-     if (!profilePictureInput.files.length) {
-       alert('Please select a file to upload.');
-       return;
-     }
-
-     // Prepare the file for upload
-     const formData = new FormData();
-     formData.append('profilePicture', profilePictureInput.files[0]);
-
-     try {
-       const response = await fetch('/api/uploadProfilePicture', {
-         method: 'POST',
-         body: formData,
-       });
-
-       if (response.ok) {
-         const result = await response.json();
-
-         // Update the profile picture in the DOM
-         profilePicture.src = result.profilePictureUrl;
-         localStorage.setItem('profilePicture', result.profilePictureUrl);
-
-         // Show success message
-         uploadStatus.classList.remove('hidden');
-         uploadError.classList.add('hidden');
-       } else {
-         // Show error message
-         uploadStatus.classList.add('hidden');
-         uploadError.classList.remove('hidden');
-       }
-     } catch (error) {
-       console.error('Error uploading profile picture:', error);
-       uploadStatus.classList.add('hidden');
-       uploadError.classList.remove('hidden');
-     }
-   });
- }
-
+  
+  
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
