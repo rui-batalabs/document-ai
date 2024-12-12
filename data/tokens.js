@@ -17,6 +17,7 @@ const exportedMethods = {
         return tokens;
     },
 
+
     async updateTokenExpiration(token) {
         const tokenCollection = await passwordTokens();
         const userToken = await tokenCollection.findOneAndUpdate(
@@ -65,4 +66,5 @@ const exportedMethods = {
 
 };
 
+//TEST CHANGE
 export default exportedMethods;
