@@ -5,6 +5,16 @@ body {
   padding: 0;
   background-color: #f4f4f9;
   color: #333;
+  background: linear-gradient(90deg, #fff, #007BFF, #333);
+  background-size: 200% 200%;
+  animation: gradientAnimation 2s  steps(3) infinite;
+  font-family: Arial, sans-serif;
+}
+
+@keyframes gradientAutomation {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
 }
 
 h1 {
