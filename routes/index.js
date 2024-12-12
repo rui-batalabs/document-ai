@@ -6,7 +6,6 @@ import profileRoute from './profile.js';
 import signoutRoute from './signout.js';
 import dashboardRoute from './dashboard.js';
 import passwordResetRoute from './passwordReset.js';
-import chatRoute from './chat.js';
 
 const router = Router();
 
@@ -17,7 +16,6 @@ router.use('/dashboard', dashboardRoute);
 router.use('/register', registerRoute);
 router.use('/private/profile', profileRoute);
 router.use('/signout', signoutRoute);
-router.use('/passwordreset', passwordResetRoute);
-router.use('/chat', chatRoute);
+router.use('/passwordreset', passwordResetRoute )
 
 export default router;
