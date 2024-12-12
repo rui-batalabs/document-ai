@@ -8,9 +8,25 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto py-8">
-        <h1 class="text-3xl font-bold text-center mb-8">Welcome, {{username}}!</h1>
+        <h1 class="text-3xl font-bold text-center mb-8">Welcome, {{user.username}}!</h1>
 
-        <!-- Upload Form -->
+        <!-- Profile Picture Section -->
+        <div class="bg-white shadow-md rounded p-6 mb-6 text-center">
+            <h2 class="text-2xl font-semibold mb-4">Profile Picture</h2>
+            <div class="profile-picture-container mb-4">
+                <img id="profile-picture" src="{{user.profile_picture}}" alt="Profile Picture" class="profile-img mx-auto" />
+            </div>
+            <form id="profile-picture-form" action="/dashboard/uploadProfilePicture" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <input type="file" name="profilePicture" accept="image/*" required
+                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <button type="submit"
+                        class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-500">
+                    Upload Profile Picture
+                </button>
+            </form>
+        </div>
+
+        <!-- Upload Document Section -->
         <div class="bg-white shadow-md rounded p-6 mb-6 text-center">
             <h2 class="text-2xl font-semibold mb-4">Upload a Document</h2>
             <form action="/dashboard/upload" method="POST" enctype="multipart/form-data" class="space-y-4">
@@ -41,12 +57,18 @@
                                 <td class="border px-4 py-2">{{this.filename}}</td>
                                 <td class="border px-4 py-2">{{this.uploadDate}}</td>
                                 <td class="border px-4 py-2">
-                                    <a href="/dashboard/download/{{this._id}}" class="text-blue-500 hover:underline">Download</a>
+                                    <form action="/chat/{{this._id}}" method="GET" style="display: inline;">
+                                        <input type="hidden" name="question" value="Enter your question here">
+                                        <button type="submit" class="text-blue-500 hover:underline">Chat</button>
+                                    </form>
+                                    |
+                                    <a href="/dashboard/download/{{this._id}}" class="text-blue-500 hover:underline">Download</a> |
                                     <a href="/dashboard/delete/{{this._id}}" class="text-red-500 hover:underline">Delete</a>
                                 </td>
                             </tr>
                         {{/each}}
                     </tbody>
+
                 </table>
             {{else}}
                 <p class="text-gray-500">No documents uploaded yet.</p>
@@ -55,3 +77,4 @@
     </div>
 </body>
 </html>
+
