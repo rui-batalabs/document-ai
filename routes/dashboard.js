@@ -5,9 +5,57 @@ import {dbConnection} from '../config/mongoConnection.js';
 import {users} from '../config/mongoCollections.js';
 import userData from '../data/users.js';
 import helper from '../serverSideHelpers.js';
+import {PdfReader} from 'pdfreader';
+import OpenAI from 'openai';
 
 const router = Router();
 const upload = multer({dest: 'temp/'});
+
+// OpenAI API Configuration
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Function to extract text using pdfreader
+const extractTextFromPdf = async (filePath) => {
+    return new Promise((resolve, reject) => {
+        const pdfReader = new PdfReader();
+        let text = '';
+
+        pdfReader.parseFileItems(filePath, (err, item) => {
+            if (err) return reject(err);
+
+            if (!item) {
+                return resolve(text.trim());
+            }
+
+            if (item.text) {
+                text += `${item.text} `;
+            }
+        });
+    });
+};
+
+// Function to split text into chunks
+const chunkText = (text, maxTokens = 8192) => {
+    const words = text.split(/\s+/);
+    const chunks = [];
+    let currentChunk = [];
+
+    words.forEach((word) => {
+        if (currentChunk.join(' ').length + word.length + 1 > maxTokens) {
+            chunks.push(currentChunk.join(' '));
+            currentChunk = [];
+        }
+        currentChunk.push(word);
+    });
+
+    if (currentChunk.length > 0) {
+        chunks.push(currentChunk.join(' '));
+    }
+
+    return chunks;
+};
 
 /**
  * GET /dashboard
@@ -43,7 +91,7 @@ router.get('/', async (req, res) => {
 
 /**
  * POST /dashboard/upload
- * Handles document uploads for the user.
+ * Handles document uploads for the user, generates embeddings.
  */
 router.post('/upload', upload.single('document'), async (req, res) => {
     if (!req.session || !req.session.user) {
@@ -58,21 +106,63 @@ router.post('/upload', upload.single('document'), async (req, res) => {
         const db = await dbConnection();
         const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
 
+        const fs = await import('fs');
+        const filePath = req.file.path;
+
+        // Extract text from PDF using pdfreader
+        let extractedText = '';
+        try {
+            extractedText = await extractTextFromPdf(filePath);
+        } catch (error) {
+            console.error('Error extracting text from PDF:', error);
+        }
+
+        if (!extractedText || extractedText.trim() === '') {
+            console.error('No text extracted from the PDF.');
+            await fs.promises.unlink(filePath);
+            return res.status(400).send('No text found in the PDF. Please upload a text-based PDF.');
+        }
+
+        // Chunk the text for embeddings
+        const textChunks = chunkText(extractedText, 8192);
+
+        // Generate OpenAI embeddings for each chunk
+        const embeddings = [];
+        for (const chunk of textChunks) {
+            try {
+                const embeddingResponse = await openai.embeddings.create({
+                    model: 'text-embedding-ada-002', input: chunk,
+                });
+                embeddings.push(embeddingResponse.data[0].embedding);
+            } catch (embeddingError) {
+                console.error('Error generating embeddings:', embeddingError);
+                await fs.promises.unlink(filePath); // Clean up temporary file
+                return res.status(500).send('Error generating embeddings. Please try again later.');
+            }
+        }
+
+        // Upload the file to GridFS
         const uploadStream = bucket.openUploadStream(req.file.originalname, {
-            metadata: {user: req.session.user.email},
+            metadata: {
+                user: req.session.user.email, embeddings,
+            },
         });
 
-        const fs = await import('fs');
-        const stream = fs.createReadStream(req.file.path);
+        const stream = fs.createReadStream(filePath);
 
         stream.pipe(uploadStream)
-            .on('error', (error) => {
+            .on('error', async (error) => {
                 console.error('Error uploading file:', error);
+                await fs.promises.unlink(filePath);
                 res.status(500).send('File upload failed.');
             })
             .on('finish', async () => {
                 console.log(`File uploaded successfully: ${uploadStream.id}`);
-                const user = await userData.addUserDocument(req.session.user.email, uploadStream.id);
+                await userData.addUserDocument(req.session.user.email, uploadStream.id);
+
+                // Delete the temporary file
+                await fs.promises.unlink(filePath);
+
                 res.redirect('/dashboard');
             });
     } catch (error) {
@@ -105,24 +195,25 @@ router.get('/download/:id', async (req, res) => {
     }
 });
 
+/**
+ * GET /dashboard/delete/:id
+ * Handles file deletion by ID.
+ */
 router.get('/delete/:id', async (req, res) => {
     const fileId = new ObjectId(req.params.id);
 
-    try{
+    try {
         const db = await dbConnection();
         const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
 
         await bucket.delete(fileId);
         const email = helper.emailCheck(req.session.user.email);
-        const updatedUser = userData.deleteUserFile(email, fileId);
+        await userData.deleteUserFile(email, fileId);
         res.redirect('/dashboard');
-    }
-    catch(error) {
+    } catch (error) {
         console.error('Error deleting file:', error);
         res.status(500).send('Internal Server Error');
     }
-})
-
-
+});
 
 export default router;
