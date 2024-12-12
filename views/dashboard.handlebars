@@ -11,7 +11,7 @@
         <h1 class="text-3xl font-bold text-center mb-8">Welcome, {{username}}!</h1>
 
         <!-- Upload Form -->
-        <div class="bg-white shadow-md rounded p-6 mb-6">
+        <div class="bg-white shadow-md rounded p-6 mb-6 text-center">
             <h2 class="text-2xl font-semibold mb-4">Upload a Document</h2>
             <form action="/dashboard/upload" method="POST" enctype="multipart/form-data" class="space-y-4">
                 <input type="file" name="document" accept=".pdf,.doc,.docx,.txt" required
@@ -24,7 +24,7 @@
         </div>
 
         <!-- Document List -->
-        <div class="bg-white shadow-md rounded p-6">
+        <div class="bg-white shadow-md rounded p-6 text-center">
             <h2 class="text-2xl font-semibold mb-4">Your Documents</h2>
             {{#if documents.length}}
                 <table class="table-auto w-full text-left border-collapse">
