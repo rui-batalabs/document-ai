@@ -74,6 +74,30 @@ const exportedMethods = {
         return updatedUser;
     },
 
+    async updateProfilePicture(email, profilePictureUrl) {
+        // Validate input
+        email = helper.emailCheck(email);
+        if (!profilePictureUrl || typeof profilePictureUrl !== 'string') {
+            throw new Error('Invalid profile picture URL');
+        }
+
+        const usersCollection = await users();
+
+        // Update the user's profile picture
+        const updatedUser = await usersCollection.findOneAndUpdate(
+            { email: email },
+            { $set: { profile_picture: profilePictureUrl } },
+            { returnDocument: 'after' }
+        );
+
+        if (!updatedUser.value) {
+            throw new Error('Failed to update profile picture');
+        }
+
+        return updatedUser.value; // Return the updated user object
+    },
+    
+    
     async addUserQuery(email, query_id) {
         email = helper.emailCheck(email);
         if (!query_id) throw 'no document id';

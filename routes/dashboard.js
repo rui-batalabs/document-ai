@@ -42,6 +42,54 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * POST /dashboard/uploadProfilePicture
+ * Handles profile picture uploads for the user.
+ */
+router.post('/uploadProfilePicture', upload.single('profilePicture'), async (req, res) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).send('Unauthorized');
+    }
+  
+    if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+    }
+  
+    try {
+      const db = await dbConnection();
+      const bucket = new GridFSBucket(db, { bucketName: 'profilePictures' });
+  
+      // Upload the profile picture to GridFS
+      const uploadStream = bucket.openUploadStream(req.file.originalname, {
+        metadata: { user: req.session.user.email },
+      });
+  
+      const fs = await import('fs');
+      const stream = fs.createReadStream(req.file.path);
+  
+      stream.pipe(uploadStream)
+        .on('error', (error) => {
+          console.error('Error uploading profile picture:', error);
+          res.status(500).send('Profile picture upload failed.');
+        })
+        .on('finish', async () => {
+          console.log(`Profile picture uploaded successfully: ${uploadStream.id}`);
+  
+          // Update the user's profile picture in the database
+          const usersCollection = await users();
+          await usersCollection.updateOne(
+            { email: req.session.user.email },
+            { $set: { profile_picture: `/profilePictures/${uploadStream.id}` } }
+          );
+  
+          res.json({ profilePictureUrl: `/profilePictures/${uploadStream.id}` });
+        });
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+
+/**
  * POST /dashboard/upload
  * Handles document uploads for the user.
  */
