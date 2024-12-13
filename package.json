@@ -23,6 +23,7 @@
     "multer-gridfs-storage": "^5.0.2",
     "nodemailer": "^6.9.16",
     "openai": "^4.76.1",
+    "particles.js": "^2.0.0",
     "path": "^0.12.7",
     "pdfreader": "^3.0.5",
     "tailwindcss": "^3.4.15",
