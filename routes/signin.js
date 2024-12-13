@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { users } from '../config/mongoCollections.js';
 import helper from '../serverSideHelpers.js';
+import xss from 'xss';
 
 const router = Router();
 
@@ -24,9 +25,9 @@ router.get('/', (req, res) => {
  */
 router.post('/', async (req, res) => {
     try {
-        // Validate email and password input
-        const email = helper.emailCheck(req.body.email);
-        const password = helper.passwordCheck(req.body.password);
+        // Validate and sanitize email and password input
+        const email = xss(helper.emailCheck(req.body.email));
+        const password = xss(helper.passwordCheck(req.body.password));
 
         // Retrieve the user from the database
         const usersCollection = await users();

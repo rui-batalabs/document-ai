@@ -1,7 +1,8 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import {users} from '../config/mongoCollections.js';
+import { users } from '../config/mongoCollections.js';
 import helper from '../serverSideHelpers.js';
+import xss from 'xss';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ router.get('/', (req, res) => {
     if (req.session && req.session.user) {
         return res.redirect('/private');
     }
-    res.sendFile('static/register.html', {root: '.'});
+    res.sendFile('static/register.html', { root: '.' });
 });
 
 /**
@@ -27,10 +28,10 @@ router.post('/', async (req, res) => {
             return res.redirect('/private');
         }
 
-        // Validate email and password inputs
-        const email = helper.emailCheck(req.body.email);
-        const password = helper.passwordCheck(req.body.password);
-        const confirmPassword = req.body.confirmPassword;
+        // Validate and sanitize email, password, and confirmPassword inputs
+        const email = xss(helper.emailCheck(req.body.email));
+        const password = xss(helper.passwordCheck(req.body.password));
+        const confirmPassword = xss(req.body.confirmPassword);
 
         // Check if passwords match
         if (password !== confirmPassword) {
@@ -38,7 +39,7 @@ router.post('/', async (req, res) => {
         }
 
         const usersCollection = await users();
-        const existingUser = await usersCollection.findOne({email: email.toLowerCase()});
+        const existingUser = await usersCollection.findOne({ email: email.toLowerCase() });
 
         if (existingUser) {
             return res.status(400).send('Email already exists.');
@@ -49,7 +50,10 @@ router.post('/', async (req, res) => {
 
         // Create new user object
         const newUser = {
-            email: email.toLowerCase(), hashed_password: hashedPassword, uploaded_docs: [], queries: [],
+            email: email.toLowerCase(),
+            hashed_password: hashedPassword,
+            uploaded_docs: [],
+            queries: [],
         };
 
         console.log('New User:', newUser);
