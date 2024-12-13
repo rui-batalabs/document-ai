@@ -15,7 +15,7 @@ router.route('/')
         if (!req.session || !req.session.user) {
             return res.redirect('/home');
         }
-        res.render('passwordReset', { title: 'Password Reset' });
+        res.send('static/passwordReset.html', { root:'.'});
     })
     .post(async (req, res) => {
         if (!req.session || !req.session.user) {
@@ -43,7 +43,7 @@ router.route('/forgotPassword')
             return res.redirect('/dashboard');
         }
         try {
-            res.render('forgotPassword', { title: 'Forgot Password' });
+            res.send('static/forgotPassword.html', { root:'.'});
         } catch (e) {
             console.error('Error loading forgot password page:', e);
             res.status(500).send('Internal Server Error');
@@ -100,7 +100,7 @@ router.route('/:token')
 
             if (!updateToken) throw 'Error confirming token';
 
-            res.render('passwordReset', { title: 'Password Reset' });
+            res.send('static/passwordReset.html', { root:'.'});
         } catch (e) {
             console.error('Error validating token:', e);
             res.status(500).send('Internal Server Error');
