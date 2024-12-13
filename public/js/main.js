@@ -4,8 +4,9 @@ if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById('email').value.trim().toLowerCase();
-    const password = document.getElementById('password').value;
+    // Sanitize input values using DOMPurify
+    const email = DOMPurify.sanitize(document.getElementById('email').value.trim().toLowerCase());
+    const password = DOMPurify.sanitize(document.getElementById('password').value);
 
     try {
       const response = await fetch('/users/login', {
@@ -14,7 +15,7 @@ if (loginForm) {
         body: JSON.stringify({ email, password }),
       });
 
-  if (response.ok) {
+      if (response.ok) {
         // Redirect to the private page if successful
         window.location.href = '/private';
       } else if (response.status === 401) {
@@ -28,20 +29,18 @@ if (loginForm) {
       alert('An error occurred. Please try again later.');
     }
 
-    try{
+    try {
       if (response.redirected) {
         window.location.href = response.url; // Redirect to private or register page
       } else {
         alert('Login failed. Please check your email and password.');
       }
-    } 
-  
-    catch (error) {
+    } catch (error) {
       console.error('Error logging in:', error);
       alert('An error occurred. Please try again.');
-    }})}
+    }
   });
-
+}
 
 // Handle registration form submission
 const registerForm = document.getElementById('registerForm');
@@ -49,9 +48,10 @@ if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const username = document.getElementById('username').value.trim().toLowerCase();
-    const email = document.getElementById('email').value.trim().toLowerCase();
-    const password = document.getElementById('password').value;
+    // Sanitize input values using DOMPurify
+    const username = DOMPurify.sanitize(document.getElementById('username').value.trim().toLowerCase());
+    const email = DOMPurify.sanitize(document.getElementById('email').value.trim().toLowerCase());
+    const password = DOMPurify.sanitize(document.getElementById('password').value);
 
     try {
       const response = await fetch('/users/register', {
@@ -60,7 +60,7 @@ if (registerForm) {
         body: JSON.stringify({ username, email, password }),
       });
 
-  if (response.ok) {
+      if (response.ok) {
         // Redirect to the homepage after successful registration
         alert('Registration successful! Redirecting to the homepage.');
         window.location.href = '/';
@@ -69,19 +69,18 @@ if (registerForm) {
       } else {
         alert('An error occurred. Please try again later.');
       }
-    } 
-    catch (error) {
+    } catch (error) {
       console.error('Error during registration:', error);
       alert('An error occurred. Please try again later.');
     }
-try{
+
+    try {
       if (response.redirected) {
         window.location.href = response.url; // Redirect to homepage or appropriate page
       } else {
         alert('Registration failed. Please try again with a unique username.');
       }
-    } 
-    catch (error) {
+    } catch (error) {
       console.error('Error registering:', error);
       alert('An error occurred. Please try again.');
     }
