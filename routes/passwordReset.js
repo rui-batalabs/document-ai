@@ -15,7 +15,7 @@ router.route('/').get((req, res) => {
         res.redirect('/home');
         }
     else{
-        res.render('passwordReset', {title:'Password Reset'});
+        res.sendFile('static/passwordReset.html', { root: '.' });
     }
 
 
@@ -55,7 +55,7 @@ router.route('/forgotPassword').get((req,res) => {
         }
     else{
      try{
-        res.render('forgotPassword', {title:'Forgot Password'}); //***********************create */
+        res.sendFile('static/forgotPassword.html', { root: '.' }); //***********************create */
     } catch (e) {
         console.error('Error loading forgot password page:', e);
         res.status(500).send('Internal Server Error');
@@ -122,7 +122,7 @@ router.route('/:token').get(async (req,res) => {
         token = helper.tokenCheck(token);
         const updateToken = await tokenData.accessedToken(token);
         if(!updateToken) throw 'Error confirming token';
-        res.render('passwordReset', {title:'Password Reset'});
+        res.sendFile('static/passwordReset.html', { root: '.' });
     }
     catch(e){
         console.error('Error with token page', e);
@@ -142,7 +142,7 @@ router.route('/:token').get(async (req,res) => {
         token = helper.tokenCheck(token);
         const email = helper.emailCheck(await passwordTokens().find({token:token}).email)
         const updatedUser = await userData.changeUserPassword(email, password, confirmPassword);
-
+        res.redirect('/home');
     }
     catch(e){
         console.error('Error posting new password with token', e);
