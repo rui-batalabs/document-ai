@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
         const existingUser = await usersCollection.findOne({ email: email.toLowerCase() });
 
         if (existingUser) {
-            return res.status(400).send('Email already exists.');
+            return res.status(400).json({error:'Email already exists.'});
         }
 
         // Hash the password
@@ -64,11 +64,11 @@ router.post('/', async (req, res) => {
         if (insertResult.acknowledged) {
             return res.redirect('/signin');
         } else {
-            return res.status(500).send('Failed to register user.');
+            return res.status(500).json({error:'Failed to register user.'});
         }
     } catch (error) {
         console.error('Error during registration:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({error: error});
     }
 });
 
