@@ -76,11 +76,14 @@ router.get('/', async (req, res) => {
             return res.status(404).send('User not found.');
         }
 
+        // Ensure a placeholder image if no profile picture
+        user.profile_picture = user.profile_picture || '/noProfilePicture.jpg';
+
         // Query uploaded documents
         const files = await bucket.find({'metadata.user': req.session.user.email}).toArray();
 
         res.render('dashboard', {
-            username: user.username || 'User',
+            user, // Pass the full user object to the template
             documents: files,
         });
     } catch (error) {
@@ -218,6 +221,5 @@ router.get('/delete/:id', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
 
 export default router;
