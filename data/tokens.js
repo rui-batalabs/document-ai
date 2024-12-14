@@ -66,7 +66,7 @@ const exportedMethods = {
 
     async accessedToken(token){
         token = helper.tokenCheck(token);
-        const tokenCollection = passwordTokens();
+        const tokenCollection = await passwordTokens();
         const updatedToken = await tokenCollection.findOneAndUpdate(
             {token: token},
             {$set: {accessed:true}},

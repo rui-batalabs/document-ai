@@ -29,6 +29,16 @@ const exportedMethods = {
             if(user.length <5 || user.length>20) throw 'Your username must be input with 5 to 20 characters';
             if(!/^[a-zA-Z0-9_]$/.test(user)) throw 'usernames must have only letters, numbers, and or underscores';
             return user.toLowerCase();
+        },
+        tokenCheck(token) {
+            if (!token) throw 'There is no token';
+            if (typeof(token) !== 'string') throw 'this token is not a string';
+            token = token.trim();
+            if (token == '') throw 'This token cannot be empty';
+            if (!/^[a-z0-9]{16}$/.test(token)) {
+                throw 'invalid token format';
+            } 
+            return token;
         }
 
 }
