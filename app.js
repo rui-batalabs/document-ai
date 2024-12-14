@@ -1,24 +1,38 @@
 import dotenv from 'dotenv';
-
-dotenv.config({path: './.env'});
-
 import express from 'express';
 import session from 'express-session';
 import routes from './routes/index.js';
 import exphbs from 'express-handlebars';
+
+dotenv.config({path: './.env'});
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(express.static('public'));
-app.use('/static', express.static('static'))
-app.use(session({
-    name: 'cookieKey', secret: 'super_secret_key', resave: false, saveUninitialized: true, cookie: {maxAge: 600000}
-}));
 
-app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
+app.use(express.static('public'));
+app.use('/static', express.static('static'));
+
+app.use(
+    session({
+        name: 'cookieKey',
+        secret: 'super_secret_key',
+        resave: false,
+        saveUninitialized: true,
+        cookie: {maxAge: 600000},
+    })
+);
+
+app.engine(
+    'handlebars',
+    exphbs.engine({
+        defaultLayout: 'main',
+        layoutsDir: 'views/layouts',
+        partialsDir: 'views/partials',
+    })
+);
 app.set('view engine', 'handlebars');
 
 app.use('/', routes);
