@@ -9,7 +9,7 @@
     "dev": "nodemon app.js"
   },
   "keywords": [],
-  "author": "Rui Costa, Richard Ortiz, Vikrant Bakshi, Cem Sahin, Jonathan Morgan-Nishimura",
+  "author": "Rui Costa (rui-batalabs) , Richard Ortiz (Ric999999), Vikrant Bakshi (bagha001), Cem Sahin (cembsahin), Jonathan Morgan-Nishimura (Appleseed17)",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
