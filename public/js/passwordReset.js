@@ -74,14 +74,12 @@ import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@latest/dist/purify
    //CHECKS PASSWORD RESET IF NOT SIGNED IN FROM FORGOT YOUR PASSWORD
  const forgotPasswordForm = document.getElementById('forgotForm');
  if (forgotPasswordForm) {
-   console.log("here")
    forgotPasswordForm.addEventListener('submit', async (e) => {
      e.preventDefault();
      let password = document.getElementById('password').value;
      let confirmPassword = document.getElementById('confirmPassword').value;
      let path = window.location.pathname;
      let token = path.substring(15)
-     console.log(token)
      
      try {
        token = DOMPurify.sanitize(helper.tokenCheck(token));
@@ -90,7 +88,7 @@ import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@latest/dist/purify
 
        if (password !== confirmPassword) throw 'These passwords are not matching';
        let path = `/passwordreset/${token}`
-       console.log(path)
+
        const response = await fetch(path, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },

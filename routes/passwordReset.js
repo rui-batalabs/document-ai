@@ -32,7 +32,6 @@ router.route('/')
             if (newPassword !== confirmPassword) throw 'These passwords do not match';
 
             const updatedUser = await userData.changeUserPassword(email, newPassword, confirmPassword);
-            console.log(updatedUser)
             res.redirect('/dashboard');
         } catch (e) {
             console.error('Error during password reset:', e);
@@ -96,7 +95,6 @@ router.route('/:token')
             return res.redirect('/dashboard');
         }
         try {
-            console.log(req.params.token);
             const token = xss(helper.tokenCheck(req.params.token));
             const updateToken = await tokenData.accessedToken(token);
 
@@ -105,12 +103,11 @@ router.route('/:token')
             res.sendFile(path.resolve('static/forgotPasswordReset.html'));
         } catch (e) {
             console.error('Error validating token:', e);
-            res.status(500).send('Internal Server Error');
+            res.status(500).redirect('/passwordreset/forgotPassword');
         }
     })
     .post(async (req, res) => {
         if (req.session?.user) {
-            console.log("here1")
             return res.redirect('/dashboard');
         }
 
