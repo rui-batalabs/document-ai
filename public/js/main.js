@@ -8,6 +8,17 @@ if (loginForm) {
     const email = DOMPurify.sanitize(document.getElementById('email').value.trim().toLowerCase());
     const password = DOMPurify.sanitize(document.getElementById('password').value);
 
+    // Validate email and password
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 8) {
+      alert('Password must be at least 8 characters long.');
+      return;
+    }
+    
     try {
       const response = await fetch('/users/login', {
         method: 'POST',
@@ -53,6 +64,21 @@ if (registerForm) {
     const email = DOMPurify.sanitize(document.getElementById('email').value.trim().toLowerCase());
     const password = DOMPurify.sanitize(document.getElementById('password').value);
 
+    // Validate username, email, and password
+    if (username.length < 3) {
+      alert('Username must be at least 3 characters long.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 8) {
+      alert('Password must be at least 8 characters long.');
+      return;
+    }
+    
     try {
       const response = await fetch('/users/register', {
         method: 'POST',
