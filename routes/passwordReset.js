@@ -119,11 +119,14 @@ router.route('/:token')
             const tokenCollection = await passwordTokens();
             const email = xss(helper.emailCheck((await tokenCollection.findOne({token:token})).email));
             await userData.changeUserPassword(email, password, confirmPassword);
-            res.redirect('/signin');
+            res.json({update:true})
+            
+            //res.redirect('/signin');
         } 
         catch (e) {
             console.error('Error resetting password with token:', e);
-            res.status(500).send('Internal Server Error');
+            res.json({update:false, error:e})
+            //res.status(500).send('Internal Server Error');
         }
     });
 
