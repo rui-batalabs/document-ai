@@ -8,21 +8,12 @@ dotenv.config({path: './.env'});
 
 const app = express();
 const PORT = 3000;
-const rewriteUnsupportedBrowserMethods = (req, res, next) => {
-    if (req.body && req.body._method) {
-      req.method = req.body._method;
-      delete req.body._method;
-    }
-    // let the next middleware run:
-    next();
-  };
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use(express.static('public'));
 app.use('/static', express.static('static'));
-app.use(rewriteUnsupportedBrowserMethods);
 
 app.use(
     session({
@@ -46,9 +37,6 @@ app.set('view engine', 'handlebars');
 
 app.use('/', routes);
 
-app.use((req, res) =>{
-    res.redirect('/');
-})
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
