@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -13,21 +15,27 @@
         <!-- Upload Document Section -->
         <div class="bg-white shadow-md rounded p-6 mb-6 text-center">
             <h2 class="text-2xl font-semibold mb-4">Upload a Document</h2>
-            <form action="/dashboard/upload" method="POST" enctype="multipart/form-data" class="flex flex-col items-start space-y-4">
+            <form id="upload-form" action="/dashboard/upload" method="POST" enctype="multipart/form-data" class="flex flex-col items-start space-y-4">
                 <input type="file" name="document" accept=".pdf,.doc,.docx,.txt" required
                        class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                <button type="submit"
-                        class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-500">
-                    Upload
+                <button id="upload-button" type="submit"
+                        class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 flex items-center">
+                    <span class="spinner hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Upload</span>
                 </button>
             </form>
         </div>
 
         <!-- Document List -->
         <div class="bg-white shadow-md rounded p-6">
-            <h2 class="text-2xl font-semibold mb-4">Your Documents</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-semibold mb-4">Your Documents</h2>
+                <button id="export-pdf" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-500">
+                    Export as PDF
+                </button>
+            </div>
             {{#if documents.length}}
-                <table class="table-auto w-full text-left border-collapse">
+                <table id="document-table" class="table-auto w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-200">
                             <th class="px-4 py-2">Filename</th>
@@ -37,6 +45,7 @@
                     </thead>
                     <tbody>
                         {{#each documents}}
+                            <!-- Document Row -->
                             <tr>
                                 <td class="border px-4 py-2">{{this.filename}}</td>
                                 <td class="border px-4 py-2">{{this.uploadDate}}</td>
@@ -49,6 +58,16 @@
                                     <a href="/dashboard/delete/{{this._id}}" class="text-red-500 hover:underline">Delete</a>
                                 </td>
                             </tr>
+                            <!-- Insights Row -->
+                            <tr>
+                                <td colspan="3" class="border px-4 py-2 bg-gray-50">
+                                    <h3 class="text-lg font-semibold mb-2">Insights</h3>
+                                    <ul class="list-disc pl-5 text-gray-700">
+                                        <li>Word Count: {{this.metadata.wordCount}}</li>
+                                        <li>Summary: {{this.metadata.summary}}</li>
+                                    </ul>
+                                </td>
+                            </tr>
                         {{/each}}
                     </tbody>
                 </table>
@@ -57,5 +76,40 @@
             {{/if}}
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('upload-form');
+            const uploadButton = document.getElementById('upload-button');
+            const spinner = uploadButton.querySelector('.spinner');
+            const buttonText = uploadButton.querySelector('span:last-child');
+
+            uploadForm.addEventListener('submit', (e) => {
+
+                spinner.classList.remove('hidden');
+                buttonText.textContent = 'Uploading...';
+                uploadButton.disabled = true;
+            });
+
+            // Export PDF functionality
+            const exportPdfButton = document.getElementById('export-pdf');
+            exportPdfButton.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                const table = document.getElementById('document-table');
+
+                // Add table to the PDF
+                doc.html(table, {
+                    callback: (pdf) => {
+                        pdf.save('documents.pdf');
+                    },
+                    x: 10,
+                    y: 10
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>

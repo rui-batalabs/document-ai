@@ -94,7 +94,7 @@ router.get('/', async (req, res) => {
 
 /**
  * POST /dashboard/upload
- * Handles document uploads for the user, generates embeddings.
+ * Handles document uploads for the user, generates embeddings, word count, and a summary.
  */
 router.post('/upload', upload.single('document'), async (req, res) => {
     if (!req.session || !req.session.user) {
@@ -126,6 +126,9 @@ router.post('/upload', upload.single('document'), async (req, res) => {
             return res.status(400).send('No text found in the PDF. Please upload a text-based PDF.');
         }
 
+        // Calculate word count
+        const wordCount = extractedText.split(/\s+/).length;
+
         // Chunk the text for embeddings
         const textChunks = chunkText(extractedText, 512);
 
@@ -134,8 +137,7 @@ router.post('/upload', upload.single('document'), async (req, res) => {
         for (const chunk of textChunks) {
             try {
                 const embeddingResponse = await openai.embeddings.create({
-                    model: 'text-embedding-ada-002',
-                    input: chunk,
+                    model: 'text-embedding-ada-002', input: chunk,
                 });
                 embeddings.push(embeddingResponse.data[0].embedding);
             } catch (embeddingError) {
@@ -145,12 +147,13 @@ router.post('/upload', upload.single('document'), async (req, res) => {
             }
         }
 
+        // Generate a summary of the document
+        const summary = await generateSummary(extractedText);
+
         // Upload the file to GridFS
         const uploadStream = bucket.openUploadStream(req.file.originalname, {
             metadata: {
-                user: req.session.user.email,
-                embeddings,
-                textChunks,
+                user: req.session.user.email, embeddings, textChunks, wordCount, summary,
             },
         });
 
@@ -176,6 +179,37 @@ router.post('/upload', upload.single('document'), async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+/**
+ * Generate a summary of the extracted text using OpenAI API.
+ * Handles long inputs by truncating or processing in chunks.
+ * @param {string} text - The extracted text from the document.
+ * @returns {Promise<string>} - A summary of the document.
+ */
+const generateSummary = async (text) => {
+    const maxInputTokens = 4000;
+    const maxOutputTokens = 300;
+
+    if (text.split(/\s+/).length > maxInputTokens) {
+        text = text.split(/\s+/).slice(0, maxInputTokens).join(' ');
+    }
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4', messages: [{
+                role: 'system',
+                content: 'You are an assistant that summarizes long documents into concise, meaningful summaries.',
+            }, {
+                role: 'user', content: `Please summarize the following text into one sentence:\n\n${text}`,
+            },], max_tokens: maxOutputTokens,
+        });
+        return response.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        return 'Summary could not be generated.';
+    }
+};
+
 
 /**
  * GET /dashboard/download/:id
