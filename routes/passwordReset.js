@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { passwordTokens, users } from '../config/mongoCollections.js';
 import helper from '../serverSideHelpers.js';
 import { userData, tokenData } from '../data/index.js';
+
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import xss from 'xss';
@@ -101,7 +102,7 @@ router.route('/:token')
 
             if (!updateToken) throw 'Error confirming token';
 
-            res.sendFile(path.resolve('static/passwordReset.html'));
+            res.sendFile(path.resolve('static/forgotPasswordReset.html'));
         } catch (e) {
             console.error('Error validating token:', e);
             res.status(500).send('Internal Server Error');
@@ -114,19 +115,16 @@ router.route('/:token')
         }
 
         try {
-            console.log(req.body.test)
-            console.log("here")
             const token = xss(helper.tokenCheck(req.params.token));
             const password = xss(helper.passwordCheck(req.body.password));
             const confirmPassword = xss(helper.passwordCheck(req.body.confirmPassword));
-            console.log(token);
             if (password !== confirmPassword) throw 'These passwords do not match';
-
-            const email = xss(helper.emailCheck((await passwordTokens().findOne({ token })).email));
+            const tokenCollection = await passwordTokens();
+            const email = xss(helper.emailCheck((await tokenCollection.findOne({token:token})).email));
             await userData.changeUserPassword(email, password, confirmPassword);
-
             res.redirect('/signin');
-        } catch (e) {
+        } 
+        catch (e) {
             console.error('Error resetting password with token:', e);
             res.status(500).send('Internal Server Error');
         }
