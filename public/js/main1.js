@@ -46,6 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Validate file type and size
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      const maxSize = 5 * 1024 * 1024; // 5 MB
+
+      if (!allowedTypes.includes(profilePictureInput.files[0].type)) {
+        alert('Please upload a valid image file (JPEG/PNG).');
+        return;
+      }
+      if (profilePictureInput.files[0].size > maxSize) {
+        alert('File size exceeds the 5 MB limit.');
+        return;
+      }
+      
       // Prepare the file for upload
       const formData = new FormData();
       formData.append('profilePicture', profilePictureInput.files[0]);
@@ -87,6 +100,22 @@ document.addEventListener('DOMContentLoaded', () => {
       let password = document.getElementById('password').value;
       let confirmPassword = document.getElementById('confirmPassword').value;
 
+       // Validate email and password
+       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+       if (!emailRegex.test(email)) {
+         alert('Please enter a valid email address.');
+         return;
+       }
+       if (password.length < 8) {
+         alert('Password must be at least 8 characters long.');
+         return;
+       }
+       if (password !== confirmPassword) {
+         alert('Passwords do not match.');
+         return;
+       }
+      
+      
       try {
         email = DOMPurify.sanitize(helper.emailCheck(email));  // Sanitize email
         password = DOMPurify.sanitize(helper.passwordCheck(password));  // Sanitize password
@@ -130,6 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
       let email = document.getElementById('email').value.trim().toLowerCase();
       let password = document.getElementById('password').value;
 
+       // Validate email
+       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+       if (!emailRegex.test(email)) {
+         alert('Please enter a valid email address.');
+         return;
+       }
+      
       try {
         email = DOMPurify.sanitize(helper.emailCheck(email));  // Sanitize email
         password = DOMPurify.sanitize(helper.passwordCheck(password));  // Sanitize password
