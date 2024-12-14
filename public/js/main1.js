@@ -12,13 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Function to check login status
   const isLoggedIn = () => Boolean(localStorage.getItem('user'));
-
   if (isLoggedIn()) {
     loginLink.style.display = 'none';
     logoutLink.style.display = 'inline';
     profilePicture.src = DOMPurify.sanitize(localStorage.getItem('profilePicture') || '/noProfilePicture.jpg');  // Sanitize URL
   } else {
-    logoutLink.style.display = 'none';
+    //logoutLink.style.display = 'none';
   }
 
   // Handle logout action

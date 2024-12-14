@@ -9,8 +9,8 @@ router.get('/', (req, res)=>{
     else{
         req.session.destroy();
         res.clearCookie('cookieKey')
-        res.render('signoutuser', {title:"Sign-out", themePreference:"default"})}
-    }
+        res.redirect('/')
+    }}
 )
 
 export default router;
