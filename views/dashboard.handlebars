@@ -84,8 +84,8 @@
             const spinner = uploadButton.querySelector('.spinner');
             const buttonText = uploadButton.querySelector('span:last-child');
 
+            // Spinner logic during upload
             uploadForm.addEventListener('submit', (e) => {
-
                 spinner.classList.remove('hidden');
                 buttonText.textContent = 'Uploading...';
                 uploadButton.disabled = true;
@@ -93,23 +93,55 @@
 
             // Export PDF functionality
             const exportPdfButton = document.getElementById('export-pdf');
-            exportPdfButton.addEventListener('click', () => {
+            exportPdfButton.addEventListener('click', async () => {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
                 const table = document.getElementById('document-table');
 
-                // Add table to the PDF
-                doc.html(table, {
-                    callback: (pdf) => {
-                        pdf.save('documents.pdf');
-                    },
-                    x: 10,
-                    y: 10
+                if (!window.html2canvas) {
+                    console.error("html2canvas is not loaded. Ensure it is included in your project.");
+                    return;
+                }
+
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
                 });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+
+                try {
+                    const canvas = await html2canvas(table, {
+                        scale: 2,
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+
+                    const canvasWidth = canvas.width;
+                    const canvasHeight = canvas.height;
+                    const aspectRatio = canvasWidth / canvasHeight;
+
+                    let pdfWidth = pageWidth - 20;
+                    let pdfHeight = pdfWidth / aspectRatio;
+
+                    if (pdfHeight > pageHeight - 20) {
+                        pdfHeight = pageHeight - 20;
+                        pdfWidth = pdfHeight * aspectRatio;
+                    }
+
+                    const xOffset = (pageWidth - pdfWidth) / 2;
+                    const yOffset = (pageHeight - pdfHeight) / 2;
+
+                    doc.addImage(imgData, 'PNG', xOffset, yOffset, pdfWidth, pdfHeight);
+                    doc.save('documents.pdf');
+                } catch (error) {
+                    console.error('Error exporting as PDF:', error);
+                }
             });
         });
     </script>
+
 
 </body>
 </html>
