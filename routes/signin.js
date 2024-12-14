@@ -32,18 +32,18 @@ router.post('/', async (req, res) => {
         // Retrieve the user from the database
         const usersCollection = await users();
         const user = await usersCollection.findOne({ email: email.toLowerCase() });
-
         if (user && await bcrypt.compare(password, user.hashed_password)) {
             // Set session with user details
             req.session.user = { email: user.email, userId: user._id };
             return res.redirect('/dashboard');
         }
-
+        else{
+            throw 'Email or Password incorrect';
+        }
         // Redirect to registration if login fails
-        res.redirect('/register');
     } catch (error) {
         console.error('Error during sign-in:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({error: error});
     }
 });
 
