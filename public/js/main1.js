@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
+      
       let email = document.getElementById('email').value.trim().toLowerCase();
       let password = document.getElementById('password').value;
 
@@ -134,32 +134,30 @@ document.addEventListener('DOMContentLoaded', () => {
         email = DOMPurify.sanitize(helper.emailCheck(email));  // Sanitize email
         password = DOMPurify.sanitize(helper.passwordCheck(password));  // Sanitize password
         
-        const response = await fetch('/passwordreset', {
+        const response = await fetch('/signin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: password, confirmPassword: confirmPassword }),
+          body: JSON.stringify({ password: password, email:email }),
         });
 
         if (response.ok) {
-          // Redirect to the private page if successful
-          window.location.href = '/signin';
-        } else if (response.status === 401) {
-          // Handle invalid credentials
-          alert('Invalid password. Please try again.');
-        } else {
-          alert('An error occurred. Please try again later.');
-        }
-
-        if (response.redirected) {
-          window.location.href = response.url; // Redirect to private or register page
-        } else {
-          alert('Reset failed. Please check your passwords.');
+          
+          window.location.href = '/dashboard';
+        } 
+        else{
+          const responseData = await response.json();
+          if(responseData.error){
+            alert("Error: " + responseData.error)
+          }
+          else{
+            alert("Error Signing In");
+          }
         }
       }
 
       catch (error) {
         console.error('Error reseting password in:', error);
-        alert('An error occurred. Please try again.');
+        alert('Error: ' + error);
       }
     })
   }
