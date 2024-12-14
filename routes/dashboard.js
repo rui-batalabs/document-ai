@@ -7,6 +7,7 @@ import userData from '../data/users.js';
 import helper from '../serverSideHelpers.js';
 import {PdfReader} from 'pdfreader';
 import OpenAI from 'openai';
+import xss from 'xss';
 
 const router = Router();
 const upload = multer({dest: 'temp/'});
@@ -61,6 +62,39 @@ const chunkText = (text, maxTokens = 8192) => {
  * GET /dashboard
  * Displays the dashboard with the user's uploaded documents.
  */
+router.get('/:error', async (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/signin');
+    }
+
+    try {
+        const db = await dbConnection();
+        const bucket = new GridFSBucket(db, {bucketName: 'uploads'});
+        const usersCollection = await users();
+        const error = xss(req.params.error);
+        const user = await usersCollection.findOne({email: req.session.user.email});
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+
+        // Ensure a placeholder image if no profile picture
+        user.profile_picture = user.profile_picture || '/noProfilePicture.jpg';
+
+        // Query uploaded documents
+        const files = await bucket.find({'metadata.user': req.session.user.email}).toArray();
+
+        res.render('dashboard', {
+            user, // Pass the full user object to the template
+            documents: files,
+            error:error,
+        });
+    } catch (error) {
+        console.error('Error fetching documents:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 router.get('/', async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/signin');
@@ -123,7 +157,7 @@ router.post('/upload', upload.single('document'), async (req, res) => {
         if (!extractedText || extractedText.trim() === '') {
             console.error('No text extracted from the PDF.');
             await fs.promises.unlink(filePath);
-            return res.status(400).send('No text found in the PDF. Please upload a text-based PDF.');
+            return res.status(400).redirect('/dashboard/No Text In PDF');
         }
 
         // Calculate word count
@@ -143,7 +177,7 @@ router.post('/upload', upload.single('document'), async (req, res) => {
             } catch (embeddingError) {
                 console.error('Error generating embeddings:', embeddingError);
                 await fs.promises.unlink(filePath); // Clean up temporary file
-                return res.status(500).send('Error generating embeddings. Please try again later.');
+                return res.status(500).redirect('/dashboard/Error generating embeddings');
             }
         }
 
@@ -176,7 +210,8 @@ router.post('/upload', upload.single('document'), async (req, res) => {
             });
     } catch (error) {
         console.error('Error uploading file:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).redirect('/dashboard/Internal Server Error');
+        
     }
 });
 
