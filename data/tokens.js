@@ -34,13 +34,16 @@ const exportedMethods = {
         // Generate token, accessed = false, id, time created + time expired
         const token = helper.tokenGenerator();
         email = helper.emailCheck(email);
+        let currTime = new Date(Date.now());
+        let expireTime = new Date();
+        expireTime.setTime(currTime.getTime() + (30*60*1000));
 
         const addToken = {
             email: email,
             token: token,
             accessed: false,
-            time_created: new Date(),
-            time_expired: new Date(Date.now() + 1000 * 60),
+            time_created: currTime,
+            time_expired: expireTime,
         };
 
         const tokenCollection = await passwordTokens();
@@ -62,11 +65,15 @@ const exportedMethods = {
 
         if (!newToken) throw new Error('Error adding token');
         return newToken;
-    },
+    }, 
 
     async accessedToken(token){
         token = helper.tokenCheck(token);
         const tokenCollection = await passwordTokens();
+        const tokenCheck = await tokenCollection.findOne({token: token});
+        const currDate = new Date();
+        if(tokenCheck.expireTime<currDate) throw 'This email has expired, Please resend email.'
+        if(tokenCheck.accessed == true) throw 'This email has already been used, please resend email.'
         const updatedToken = await tokenCollection.findOneAndUpdate(
             {token: token},
             {$set: {accessed:true}},
