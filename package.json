@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "seed": "node scripts/seed.js"
   },
   "keywords": [],
   "author": "Rui Costa (rui-batalabs) , Richard Ortiz (Ric999999), Vikrant Bakshi (bagha001), Cem Sahin (cembsahin), Jonathan Morgan-Nishimura (Appleseed17)",
