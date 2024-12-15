@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
         // Validate and sanitize email, password, and confirmPassword inputs
         const email = xss(helper.emailCheck(req.body.email));
         const password = xss(helper.passwordCheck(req.body.password));
-        const confirmPassword = xss(req.body.confirmPassword);
+        const confirmPassword = xss(helper.passwordCheck(req.body.confirmPassword));
 
         // Check if passwords match
         if (password !== confirmPassword) {

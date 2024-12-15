@@ -19,6 +19,7 @@ const exportedMethods = {
 
 
     async updateTokenExpiration(token) {
+        token = helper.tokenCheck(token);
         const tokenCollection = await passwordTokens();
         const userToken = await tokenCollection.findOneAndUpdate(
             {token: token, accessed: false},
