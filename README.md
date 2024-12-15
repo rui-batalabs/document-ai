@@ -15,6 +15,51 @@ The AI-Powered Document Analysis Platform allows users to upload documents, proc
 
 Document analysis can be time-consuming, especially when dealing with long and complex texts. The platform provides an easy way for users to interact with documents, enabling them to extract key information and insights without reading the entire content. Users can upload documents, receive AI-generated summaries, and ask targeted questions to better understand important points. This makes the platform ideal for legal teams, business analysts, researchers, and more.
 
+## Install
+
+
+### 1. Install Dependencies
+Run the following command to install all required dependencies:
+```bash
+npm install
+```
+
+### 2. Set Up the Environment
+For **Windows**:
+```powershell
+$env:OPENAI_API_KEY="your-openai-api-key"
+```
+
+For **Mac/Linux**:
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+```
+
+Replace `your-openai-api-key` with your actual OpenAI API key.
+
+---
+
+### 3. Seed the Database
+Run the following command to create a test user and upload a test document:
+```bash
+npm run seed
+```
+
+- This will create a test user with the following credentials:
+    - **Email:** `user@example.com`
+    - **Password:** `Password#123`
+- It will also upload a test document (`240511514v2.pdf`) with generated embeddings, word count, summary, and text chunks.
+
+
+### 4. Start the Application
+Run the following command to launch the application:
+```bash
+npm start
+```
+
+The server will run on `http://localhost:3000`.
+
+
 ## Core Features
 
 ### Landing Page
