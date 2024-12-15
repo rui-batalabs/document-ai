@@ -76,7 +76,7 @@ router.route('/forgotPassword')
                     from: process.env.EMAIL,
                     to: email,
                     subject: 'Forgot Password',
-                    html: `<p>Click <a href="http://localhost:3000/passwordreset/${token.token}">here</a> to reset your password</p>`,
+                    html: `<p>Click <a href="http://localhost:3000/passwordreset/${token.token}">here</a> to reset your password. This link has a one-time use that expires within 30 minutes!</p>`,
                 });
 
                 if (!info) throw 'Message failed to send';

@@ -16,7 +16,7 @@ import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@latest/dist/purify
          body: JSON.stringify({ email:email}),
        });
        if (response.ok) {
-         alert('Email sent! Redirecting to the homepage.');
+         alert('If Email Has An Associated Account The Email Sent! Redirecting To The Homepage.');
          window.location.href = '/';
        } else if (response.status === 400) {
          alert('Email send failed. Please try again.');

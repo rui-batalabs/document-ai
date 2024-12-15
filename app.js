@@ -30,7 +30,7 @@ app.use(
         secret: 'super_secret_key',
         resave: false,
         saveUninitialized: true,
-        cookie: {maxAge: 600000},
+        cookie: {maxAge: 1800000},
     })
 );
 
